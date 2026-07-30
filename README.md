@@ -8,7 +8,7 @@ _ReCAP: Diagnosis-Guided Repair-State Reconstruction for Post-Validation Recover
 
 ## Architecture
 
-```
+```text
 Patch → Test → Failure Signal
                 ↓
          [ConDiag Diagnosis]
