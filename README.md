@@ -149,7 +149,7 @@ python experiments/evaluate_runs.py \
   title={ReCAP: Diagnosis-Guided Repair-State Reconstruction
          for Post-Validation Recovery in Repository-Level Repair Agents},
   author={Anonymous},
-  booktitle={AAAI},
+  booktitle={KDD},
   year={2027}
 }
 ```
