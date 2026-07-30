@@ -12,7 +12,8 @@ _ReCAP: Diagnosis-Guided Repair-State Reconstruction for Post-Validation Recover
 Patch → Test → Failure Signal
                 ↓
          [ConDiag Diagnosis]
-         多特征融合推理缺失上下文类型
+   Multi-feature Fusion to Infer
+      Missing Context Types
                 ↓
          [Reconstruction Plan] (K⁺, K⁻, 𝒬)
          ┌────┬────┬────┐
@@ -22,13 +23,13 @@ Patch → Test → Failure Signal
          └────┴─────────┴───────┘
                 ↓
          [Pack: K₂]
-         诊断感知的上下文预算分配
+ Diagnosis-aware Context Budget Allocation
                 ↓
          [Guide: ρ₂]
-         结构化修订简报
+      Structured Revision Brief
                 ↓
          [Continue: R2]
-         从失败工作区继续修复
+ Continue Repairing from the Failed Workspace
 ```
 
 ## 2×2 Evaluation Protocol
