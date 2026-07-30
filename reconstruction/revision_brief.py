@@ -144,10 +144,17 @@ def _extract_inspect_targets(
     if path and path != "unknown":
         _add(f"{path} (edit target)", path)
 
-    # 2. Router evidence hits
+    # 2. Router evidence hits (AcquisitionResult format)
     for r in router_results:
         if not isinstance(r, dict):
             continue
+        # Handle ContextUnit dict format (from acquired_units)
+        if r.get("operation") == "ACQUIRE":
+            fp = r.get("provenance", "") or ""
+            if fp and _base(fp) not in seen:
+                _add(f"{fp} [acquired]", fp)
+            continue
+        # Handle legacy AcquisitionResult format
         if r.get("status") != "FOUND":
             continue
         for hit in r.get("hits", []):

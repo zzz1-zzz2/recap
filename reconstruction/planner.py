@@ -47,7 +47,8 @@ def build_plan(
     """Compile diagnoses into structured plan with ContextUnits."""
     plan = ReconstructionPlan()
     plan.Q_contracts = list(search_contracts)
-    seen_paths: set[str] = set()
+    seen_preserve: set[str] = set()
+    seen_suppress: set[str] = set()
 
     # ── MANDATORY units (always survive packing) ──
     # FailureWitness and primary edit target are mandatory
@@ -66,14 +67,14 @@ def build_plan(
             source_type="trajectory",
             diagnosis_ids=["primary"],
         ))
-        seen_paths.add(pp)
+        seen_preserve.add(pp)
 
     # Candidate edit targets from refined diagnoses
     for d in refined_diagnoses:
         diag_id = getattr(d, "subtype", "UNKNOWN")
         for cet in (getattr(d, "candidate_edit_targets", []) or []):
-            if cet not in seen_paths and cet.endswith(".py"):
-                seen_paths.add(cet)
+            if cet not in seen_preserve and cet.endswith(".py"):
+                seen_preserve.add(cet)
                 plan.K_plus_units.append(make_unit(
                     content=cet,
                     operation="PRESERVE",
@@ -88,8 +89,8 @@ def build_plan(
         kl = getattr(d, "key_location", "") or ""
         if kl:
             fp = kl.split(":")[0] if ":" in kl else kl
-            if fp not in seen_paths and fp.endswith(".py"):
-                seen_paths.add(fp)
+            if fp not in seen_preserve and fp.endswith(".py"):
+                seen_preserve.add(fp)
                 plan.K_plus_units.append(make_unit(
                     content=fp,
                     operation="PRESERVE",
@@ -102,8 +103,8 @@ def build_plan(
     # Related targets
     for rt in revision_contract.get("related_targets", []):
         rtp = rt.get("path", "")
-        if rtp not in seen_paths and rtp.endswith(".py"):
-            seen_paths.add(rtp)
+        if rtp not in seen_preserve and rtp.endswith(".py"):
+            seen_preserve.add(rtp)
             plan.K_plus_units.append(make_unit(
                 content=rtp,
                 operation="PRESERVE",
@@ -118,9 +119,9 @@ def build_plan(
         subtype = getattr(d, "subtype", "UNCLASSIFIED")
         if subtype == "PATCH_FAILURE_LOCALIZATION_MISMATCH":
             for cet in (getattr(d, "candidate_edit_targets", []) or []):
-                if cet not in seen_paths and cet.endswith(".py"):
+                if cet.endswith(".py") and cet not in seen_suppress:
                     plan.K_minus_files.append(cet)
-                    seen_paths.add(cet)
+                    seen_suppress.add(cet)
 
     # K_minus: assumptions from evidence alignment
     for d in refined_diagnoses:

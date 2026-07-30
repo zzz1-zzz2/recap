@@ -101,16 +101,36 @@ def pack(
             if not _is_suppressed(u, suppress_set)
         ]
 
-    # ── 4. Deduplicate by provenance ──
-    seen_provenance: set[str] = set()
-    deduped: list[ContextUnit] = []
+    # ── 4. Deduplicate by provenance + operation priority ──
+    # Priority: ACQUIRE > REHYDRATE > PRESERVE > trajectory
+    # If same provenance, the higher-priority operation wins.
+    op_priority = {"ACQUIRE": 0, "REHYDRATE": 1, "PRESERVE": 2, "MANDATORY": 0}
+
+    # Sort: higher priority first (lower number = higher priority)
+    # Then stable sort by original order for equal priority
+    all_units.sort(key=lambda u: (op_priority.get(u.operation, 9), u.priority))
+
+    seen_entries: dict[str, tuple[int, ContextUnit]] = {}  # provenance -> (priority, unit)
     for u in all_units:
         key = u.provenance
-        if key and key in seen_provenance:
+        if not key:
             continue
-        if key:
-            seen_provenance.add(key)
-        deduped.append(u)
+        if key not in seen_entries:
+            seen_entries[key] = (op_priority.get(u.operation, 9), u)
+        else:
+            existing_priority, existing_unit = seen_entries[key]
+            new_priority = op_priority.get(u.operation, 9)
+            # Replace if new unit has higher priority (lower number)
+            if new_priority < existing_priority:
+                seen_entries[key] = (new_priority, u)
+
+    # Also deduplicate by unit_id (true content duplicates)
+    seen_ids: set[str] = set()
+    deduped: list[ContextUnit] = []
+    for key, (prio, unit) in sorted(seen_entries.items(), key=lambda x: x[1][0]):
+        if unit.unit_id not in seen_ids:
+            seen_ids.add(unit.unit_id)
+            deduped.append(unit)
 
     # ── 5. Sort by priority, pack under budget ──
     deduped.sort(key=lambda u: u.priority)

@@ -33,13 +33,13 @@ logger = logging.getLogger("condiag.registry")
 CB_PARQUET = Path(
     os.environ.get(
         "CONDIAG_CB_PARQUET",
-        "/home/zz/桌面/condiag/ContextBench/data/full.parquet",
+        os.getenv("RECAP_CONTEXTBENCH_PATH", "ContextBench/data/full.parquet"),
     )
 )
 MANIFEST = Path(
     os.environ.get(
         "CONDIAG_MANIFEST",
-        "/home/zz/桌面/condiag/artifacts/v2c_canary_manifest.jsonl",
+        os.getenv("RECAP_MANIFEST_PATH", "artifacts/v2c_canary_manifest.jsonl"),
     )
 )
 SWEBENCH_VERIFIED = "princeton-nlp/SWE-bench_Verified"
